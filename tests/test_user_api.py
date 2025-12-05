@@ -129,3 +129,16 @@ class TestUserAPI:
         except:
             pass
 
+    def test_create_multiple_users_performance(self):
+        """Тест создание нескольких пользователей"""
+        users = self.generator.generate_bulk_users(10)
+        start_time = time.time()
+
+        for user in users:
+            response = self.base.create_user(user)
+            assert response.status_code == 200
+            self.created_users.append(user["username"])
+
+        duration = time.time() - start_time
+        assert duration < 10
+
