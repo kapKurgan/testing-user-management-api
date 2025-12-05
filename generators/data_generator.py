@@ -26,3 +26,12 @@ class UserDataGenerator:
         """Генерация списка пользователей"""
         return [self.generate_single_user() for _ in range(count)]
 
+    def generate_invalid_user_data(self, invalid_type: str = "missing_required") -> Dict[str, Any]:
+        """Генерация невалидных данных для негативных тестов"""
+        if invalid_type == "empty_fields":
+            return {
+                "id": 0, "username": "", "firstName": "", "lastName": "",
+                "email": "", "password": "", "phone": "", "userStatus": 0
+            }
+        return {"userStatus": 1}
+
