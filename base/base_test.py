@@ -34,3 +34,15 @@ class BaseTest:
         response.raise_for_status()
         return response
 
+    def create_user(self, user_data): return self._make_request("POST", "/user", data=user_data)
+
+    def get_user(self, username): return self._make_request("GET", f"/user/{username}")
+
+    def update_user(self, username, user_data): return self._make_request("PUT", f"/user/{username}", data=user_data)
+
+    def delete_user(self, username): return self._make_request("DELETE", f"/user/{username}")
+
+    def login(self, username, password): return self._make_request("GET", "/user/login",
+                                                                   params={"username": username, "password": password})
+
+    def logout(self): return self._make_request("GET", "/user/logout")
