@@ -21,3 +21,8 @@ class UserDataGenerator:
             "phone": self.fake.phone_number(),
             "userStatus": random.choice(self.user_statuses)
         }
+
+    def generate_bulk_users(self, count: int = 5) -> List[Dict[str, Any]]:
+        """Генерация списка пользователей"""
+        return [self.generate_single_user() for _ in range(count)]
+
