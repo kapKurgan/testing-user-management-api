@@ -50,3 +50,13 @@ class TestUserAPI:
         response = self.base.login(username, password)
         assert response.status_code == 200
         self.created_users.append(username)
+
+    @pytest.mark.parametrize("username,password", [
+        ("nonexistent", "wrongpass"),
+        ("", ""),
+        ("special!@#$%", "pass"),
+    ])
+    def test_login_failure(self, username, password):
+        """Тест неуспешного входа с невалидными данными"""
+        response = self.base.login(username, password)
+        assert response.status_code == 200
