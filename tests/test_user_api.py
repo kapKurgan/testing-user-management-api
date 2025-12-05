@@ -100,3 +100,10 @@ class TestUserAPI:
 
         response = self.base.delete_user(username)
         assert response.status_code == 200
+
+    def test_delete_nonexistent_user(self):
+        """Тест удаления несуществующего пользователя"""
+        fake_username = f"fake_delete_{int(time.time())}"
+        response = self.base.delete_user(fake_username)
+        assert response.status_code in [200, 404]
+
