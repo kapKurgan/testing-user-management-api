@@ -46,3 +46,11 @@ class BaseTest:
                                                                    params={"username": username, "password": password})
 
     def logout(self): return self._make_request("GET", "/user/logout")
+
+    def log_response(self, response: requests.Response, test_name: str = ""):
+        """Логирование ответа для отладки"""
+        print(f"\n{'=' * 50}")
+        print(f"ТЕСТ: {test_name}")
+        print(f"URL: {response.request.url}")
+        print(f"СТАТУС: {response.status_code}")
+        print(f"{'=' * 50}\n")
