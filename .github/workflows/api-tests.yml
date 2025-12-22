@@ -1,7 +1,95 @@
+#name: API Tests
+#
+#on:
+#  # Ручной запуск тестов через интерфейс GitHub
+#  workflow_dispatch:
+#    inputs:
+#      SCENARIO:
+#        type: choice
+#        default: '-m login'
+#        options:
+#          - '-m login'
+#          - '-m smoke'
+#          - '-m regression'
+#          - '-m user'
+#          - '-m create'
+#          - '-m login'
+#          - '-m update'
+#          - '-m delete'
+#          - '-m performance'
+#        required: true
+#        description: 'Выберите набор тестов для запуска'
+#
+#jobs:
+#  run-tests:
+#    runs-on: ubuntu-latest
+#    timeout-minutes: 30  # Ограничение по времени выполнения
+#
+#    steps:
+#      # Шаг 1: Клонирование репозитория
+#      - name: Клонирование репозитория
+#        uses: actions/checkout@v4
+#        with:
+#          fetch-depth: 0  # Полное клонирование для корректной работы с ветками
+#
+#      # Шаг 2: Установка Python 3.12
+#      - name: Установка Python
+#        uses: actions/setup-python@v5
+#        with:
+#          python-version: '3.12'
+#          cache: 'pip'  # Кэширование зависимостей для ускорения сборки
+#
+#      # Шаг 3: Установка Python-зависимостей
+#      - name: Установка зависимостей
+#        run: |
+#          python -m pip install --upgrade pip
+#          pip install -r requirements.txt
+#
+#      # Шаг 4: Создание директории для отчетов
+#      # Каждый запуск workflow получает уникальную папку (github.run_id)
+#      - name: Создание директории отчетов
+#        run: mkdir -p ./reports/${{ github.run_id }}
+#
+#      # Шаг 5: Запуск тестов
+#      # Использует переданный сценарий (например, -m login)
+#      # Сохраняет HTML-отчет в уникальную папку
+#      # Тесты обращаются напрямую к https://petstore.swagger.io/v2
+#      - name: Запуск тестов
+##        run: pytest ${{ github.event.inputs.SCENARIO }} --html=./reports/${{ github.run_id }}/index.html
+#        run: pytest ${{ github.event.inputs.SCENARIO }} --html=./reports/${{ github.run_id }}/index.html --alluredir=reports/${{ github.run_id }}/allure-results
+#        env:
+#          # Хардкод URL реального API (можно вынести в переменную окружения репозитория)
+#          API_BASE_URL: https://petstore.swagger.io/v2
+#
+#      # Шаг 6: Деплой HTML-отчетов в GitHub Pages
+#      # Выполняется всегда (даже если тесты упали)
+#      # Публикует все отчеты в ветку gh-pages
+#      - name: Деплой отчетов в GitHub Pages
+#        if: always()
+#        uses: peaceiris/actions-gh-pages@v4
+#        with:
+#          github_token: ${{ secrets.GITHUB_TOKEN }}
+#          keep_files: true  # Сохраняет предыдущие отчеты
+#          publish_dir: reports  # Публикует всю директорию reports
+#          publish_branch: gh-pages  # Целевая ветка
+#
+#      # Шаг 7: Публикация артефактов (опционально)
+#      # Сохраняет отчеты как артефакты workflow
+#      - name: Публикация артефактов
+#        if: always()
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: test-reports-${{ github.run_id }}
+#          path: reports/${{ github.run_id }}/
+#          retention-days: 30  # Хранить 30 дней
+#
+
+
+# .github/workflows/api-tests.yml (полная версия)
+
 name: API Tests
 
 on:
-  # Ручной запуск тестов через интерфейс GitHub
   workflow_dispatch:
     inputs:
       SCENARIO:
@@ -17,69 +105,68 @@ on:
           - '-m update'
           - '-m delete'
           - '-m performance'
+          - '-v -s'
         required: true
-        description: 'Выберите набор тестов для запуска'
+        description: 'Выберите набор тестов'
 
 jobs:
   run-tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 30  # Ограничение по времени выполнения
+    timeout-minutes: 30
 
     steps:
-      # Шаг 1: Клонирование репозитория
       - name: Клонирование репозитория
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Полное клонирование для корректной работы с ветками
 
-      # Шаг 2: Установка Python 3.12
       - name: Установка Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-          cache: 'pip'  # Кэширование зависимостей для ускорения сборки
+          cache: 'pip'
 
-      # Шаг 3: Установка Python-зависимостей
       - name: Установка зависимостей
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # Шаг 4: Создание директории для отчетов
-      # Каждый запуск workflow получает уникальную папку (github.run_id)
-      - name: Создание директории отчетов
-        run: mkdir -p ./reports/${{ github.run_id }}
+      - name: Создание директорий
+        run: |
+          mkdir -p reports/${{ github.run_id }}/allure-results
+          mkdir -p reports/${{ github.run_id }}/allure-report
 
-      # Шаг 5: Запуск тестов
-      # Использует переданный сценарий (например, -m login)
-      # Сохраняет HTML-отчет в уникальную папку
-      # Тесты обращаются напрямую к https://petstore.swagger.io/v2
       - name: Запуск тестов
-#        run: pytest ${{ github.event.inputs.SCENARIO }} --html=./reports/${{ github.run_id }}/index.html
-        run: pytest ${{ github.event.inputs.SCENARIO }} --html=./reports/${{ github.run_id }}/index.html --alluredir=reports/${{ github.run_id }}/allure-results
+        run: |
+          pytest ${{ github.event.inputs.SCENARIO }} \
+            --html=./reports/${{ github.run_id }}/pytest-report.html \
+            --alluredir=reports/${{ github.run_id }}/allure-results
         env:
-          # Хардкод URL реального API (можно вынести в переменную окружения репозитория)
           API_BASE_URL: https://petstore.swagger.io/v2
 
-      # Шаг 6: Деплой HTML-отчетов в GitHub Pages
-      # Выполняется всегда (даже если тесты упали)
-      # Публикует все отчеты в ветку gh-pages
-      - name: Деплой отчетов в GitHub Pages
+      - name: Установка Allure CLI
+        if: always()
+        run: |
+          wget https://github.com/allure-framework/allure2/releases/download/2.23.0/allure_2.23.0-1_all.deb
+          sudo dpkg -i allure_*.deb
+
+      - name: Генерация Allure отчета
+        if: always()
+        run: |
+          allure generate reports/${{ github.run_id }}/allure-results \
+            --clean \
+            --output reports/${{ github.run_id }}/allure-report
+
+      - name: Деплой в GitHub Pages
         if: always()
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          keep_files: true  # Сохраняет предыдущие отчеты
-          publish_dir: reports  # Публикует всю директорию reports
-          publish_branch: gh-pages  # Целевая ветка
+          keep_files: true
+          publish_dir: reports
 
-      # Шаг 7: Публикация артефактов (опционально)
-      # Сохраняет отчеты как артефакты workflow
-      - name: Публикация артефактов
+      - name: Публикация артефактов (опционально)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-reports-${{ github.run_id }}
+          name: test-results-${{ github.run_id }}
           path: reports/${{ github.run_id }}/
-          retention-days: 30  # Хранить 30 дней
-
+          retention-days: 30
