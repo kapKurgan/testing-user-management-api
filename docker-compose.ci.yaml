@@ -1,84 +1,50 @@
 # docker-compose.ci.yaml
+# Файл конфигурации Docker Compose для CI/CD в GitHub Actions
+# Определяет минимальный стенд для тестирования API управления пользователями
+
+# Версия синтаксиса Docker Compose
 version: '3.8'
 
+# Определение сервисов (контейнеров)
 services:
-  # HTTP Mock Service - имитирует PetStore API для тестов
-  http-mock:
-    image: base-service:latest
-    container_name: ci-http-mock
+  # Имя сервиса - petstore-mock
+  # Этот контейнер будет имитировать PetStore API для локального тестирования
+  petstore-mock:
+    # Конфигурация сборки Docker-образа
+    build:
+      # Контекст сборки - текущая директория (где находится docker-compose.ci.yaml)
+      context: .
+      # Имя Dockerfile для сборки базового образа
+      dockerfile: Dockerfile.base
+
+    # Имя контейнера после запуска (удобно для логов и отладки)
+    container_name: petstore-mock
+
+    # Проброс портов: порт хоста : порт контейнера
+    # На хосте (внутри GitHub Actions runner) будет доступен порт 8080
     ports:
       - "8080:8080"
+
+    # Переменные окружения внутри контейнера
+    # SERVICE_MODE определяет режим работы сервиса (http-mock, grpc-mock и т.д.)
     environment:
       - SERVICE_MODE=http-mock
+
+    # Healthcheck - проверка готовности сервиса к работе
+    # Docker будет опрашивать этот эндпоинт, прежде чем считать сервис "здоровым"
     healthcheck:
+      # Команда проверки: используем curl для запроса к API
+      # Этот эндпоинт должен существовать в вашем mock-сервисе
       test: ["CMD", "curl", "-f", "http://localhost:8080/v2/user/login?username=test&password=test"]
+
+      # Интервал между проверками (10 секунд)
       interval: 10s
+
+      # Таймаут одной проверки (5 секунд)
       timeout: 5s
+
+      # Количество попыток перед тем, как сервис считается "нездоровым"
       retries: 10
+
+      # Время на первоначальный запуск сервиса (30 секунд)
       start_period: 30s
-    networks:
-      - ci-network
-
-  # gRPC Mock Service
-  grpc-mock:
-    image: base-service:latest
-    container_name: ci-grpc-mock
-    ports:
-      - "9090:9090"
-    environment:
-      - SERVICE_MODE=grpc-mock
-    healthcheck:
-      test: ["CMD", "grpc_health_probe", "-addr=:9090"]  # или базовая проверка
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
-    networks:
-      - ci-network
-
-  # HTTP Gateway
-  http-gateway:
-    image: base-service:latest
-    container_name: ci-http-gateway
-    ports:
-      - "8081:8080"
-    environment:
-      - SERVICE_MODE=http-gateway
-      - BACKEND_URL=http://http-mock:8080
-    depends_on:
-      http-mock:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - ci-network
-
-  # gRPC Gateway
-  grpc-gateway:
-    image: base-service:latest
-    container_name: ci-grpc-gateway
-    ports:
-      - "50051:50051"
-    environment:
-      - SERVICE_MODE=grpc-gateway
-      - GRPC_BACKEND=grpc-mock:9090
-      - HTTP_BACKEND=http://http-mock:8080
-    depends_on:
-      grpc-mock:
-        condition: service_healthy
-      http-mock:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "grpc_health_probe", "-addr=:50051"]  # или базовая проверка
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - ci-network
-
-networks:
-  ci-network:
-    driver: bridge

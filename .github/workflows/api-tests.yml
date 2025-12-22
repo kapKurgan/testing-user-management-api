@@ -1,63 +1,124 @@
+# .github/workflows/api-tests.yml
+# GitHub Actions workflow для запуска API тестов управления пользователями
+
+# Название workflow - отображается в интерфейсе GitHub Actions
 name: API Tests
 
+# Триггеры запуска workflow
 on:
+  # Ручной запуск через интерфейс GitHub (на вкладке Actions)
   workflow_dispatch:
+    # Входные параметры для ручного запуска
     inputs:
       SCENARIO:
-        type: choice
-        default: '-m login'
-        options:
-          - '-m login'
-          - 'tests/test_user_api.py'
-          - '--html=reports/pytest_report.html -m smoke'
-        required: true
-        description: 'Pytest scenario'
+        # Тип параметра - выбор из списка
+        type: 'choice'
 
+        # Значение по умолчанию
+        default: '-m login'
+
+        # Доступные варианты для запуска разных наборов тестов
+        options:
+          # Запуск только тестов входа/выхода
+          - '-m login'
+
+          # Запуск всех тестов
+          - 'tests/test_user_api.py'
+
+          # Запуск smoke тестов с HTML отчетом
+          - '--html=reports/pytest_report.html -m smoke'
+
+        # Обязательный параметр
+        required: true
+
+        # Описание, отображаемое в UI GitHub
+        description: 'Выберите набор тестов для запуска'
+
+# Определение jobs (заданий)
 jobs:
+  # Единственный job - запуск тестов
   run-tests:
+    # Тип runner'а - ubuntu-latest (стандартная виртуалка)
     runs-on: ubuntu-latest
+
+    # Таймаут - автоматическая отмена job'а после 30 минут
     timeout-minutes: 30
 
+    # Шаги job'а (последовательные действия)
     steps:
-      - name: Check out repository
+      # Шаг 1: Клонирование репозитория
+      # actions/checkout - официальный action GitHub
+      # Клонирует ваш репозиторий в /home/runner/work/{repo}/{repo}
+      - name: Клонирование репозитория
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      # Шаг 2: Установка Python
+      # Необходим для работы pytest и зависимостей
+      # actions/setup-python - официальный action
+      - name: Установка Python 3.12
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
-      - name: Build base Docker image
-        run: docker build -f Dockerfile.base -t base-service .
+      # Шаг 3: Сборка Docker-образа
+      # Собирает образ из Dockerfile.base с тегом base-service:latest
+      # Этот образ будет использоваться для mock-сервиса
+      - name: Сборка Docker-образа
+        run: docker build -f Dockerfile.base -t base-service:latest .
 
-      - name: Start test services
+      # Шаг 4: Запуск Docker-контейнера
+      # Запускает сервис petstore-mock в фоновом режиме (-d)
+      # --build - пересобирает контейнер перед запуском
+      # -f указывает конкретный docker-compose файл
+      - name: Запуск HTTP mock-сервиса
         run: docker compose -f docker-compose.ci.yaml up -d --build
 
-      - name: Wait for services
-        run: sleep 30  # или лучше использовать docker compose wait
+      # Шаг 5: Ожидание готовности сервиса
+      # Важно: даем сервису время подняться и пройти healthcheck
+      # Альтернатива: docker compose wait или цикл проверки порта
+      - name: Ожидание готовности сервиса
+        run: sleep 30
 
-      - name: Install dependencies
+      # Шаг 6: Установка зависимостей Python
+      # Устанавливает все пакеты из requirements.txt
+      # Включает pytest, allure-pytest, requests, faker и т.д.
+      - name: Установка Python-зависимостей
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Create report directory
+      # Шаг 7: Создание директории для отчетов
+      # Создает папку с именем ID запуска workflow (github.run_id)
+      # Это позволяет хранить историю отчетов
+      - name: Создание директории отчетов
         run: mkdir -p ./reports/${{ github.run_id }}
 
-      - name: Run tests
+      # Шаг 8: Запуск тестов
+      # Выполняет pytest с переданным сценарием (например, -m login)
+      # Генерирует HTML-отчет в специальной папке
+      # Передает локальный URL API через переменную окружения
+      - name: Запуск тестов
         run: pytest ${{ github.event.inputs.SCENARIO }} --html=./reports/${{ github.run_id }}/index.html
         env:
-          API_BASE_URL: http://localhost:8080  # если используете локальные сервисы
+          # Переменная окружения - используется в base_test.py
+          # Указывает, что тесты должны ходить в локальный mock-сервис
+          API_BASE_URL: http://localhost:8080/v2
 
-      - name: Deploy HTML report to GitHub Pages
-        if: always()
+      # Шаг 9: Публикация отчетов в GitHub Pages
+      # Деплоит HTML-отчеты в ветку gh-pages
+      # Можно просматривать по адресу: https://{user}.github.io/{repo}/reports/{run_id}/
+      - name: Деплой отчетов в GitHub Pages
+        if: always()  # Выполняется даже если тесты упали
         uses: peaceiris/actions-gh-pages@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          keep_files: true
-          publish_dir: reports
-          publish_branch: gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}  # Автоматический токен GitHub
+          keep_files: true  # Сохраняет старые отчеты
+          publish_dir: reports  # Какую директорию публиковать
+          publish_branch: gh-pages  # В какую ветку
 
-      - name: Stop test services
+      # Шаг 10: Остановка Docker-контейнеров
+      # Важно: очищает ресурсы и удаляет volume'ы (-v)
+      # if: always() - гарантирует выполнение даже при ошибках
+      - name: Остановка сервисов
         if: always()
         run: docker compose -f docker-compose.ci.yaml down -v
