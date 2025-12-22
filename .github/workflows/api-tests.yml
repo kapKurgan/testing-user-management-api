@@ -1,124 +1,89 @@
 # .github/workflows/api-tests.yml
-# GitHub Actions workflow для запуска API тестов управления пользователями
+# GitHub Actions workflow для тестирования API управления пользователями
 
-# Название workflow - отображается в интерфейсе GitHub Actions
 name: API Tests
 
-# Триггеры запуска workflow
 on:
-  # Ручной запуск через интерфейс GitHub (на вкладке Actions)
   workflow_dispatch:
-    # Входные параметры для ручного запуска
     inputs:
       SCENARIO:
-        # Тип параметра - выбор из списка
         type: 'choice'
-
-        # Значение по умолчанию
         default: '-m login'
-
-        # Доступные варианты для запуска разных наборов тестов
         options:
-          # Запуск только тестов входа/выхода
           - '-m login'
-
-          # Запуск всех тестов
           - 'tests/test_user_api.py'
-
-          # Запуск smoke тестов с HTML отчетом
           - '--html=reports/pytest_report.html -m smoke'
-
-        # Обязательный параметр
         required: true
-
-        # Описание, отображаемое в UI GitHub
         description: 'Выберите набор тестов для запуска'
 
-# Определение jobs (заданий)
 jobs:
-  # Единственный job - запуск тестов
   run-tests:
-    # Тип runner'а - ubuntu-latest (стандартная виртуалка)
     runs-on: ubuntu-latest
-
-    # Таймаут - автоматическая отмена job'а после 30 минут
     timeout-minutes: 30
 
-    # Шаги job'а (последовательные действия)
     steps:
       # Шаг 1: Клонирование репозитория
-      # actions/checkout - официальный action GitHub
-      # Клонирует ваш репозиторий в /home/runner/work/{repo}/{repo}
       - name: Клонирование репозитория
         uses: actions/checkout@v4
 
-      # Шаг 2: Установка Python
-      # Необходим для работы pytest и зависимостей
-      # actions/setup-python - официальный action
+      # Шаг 2: Установка Python 3.12
       - name: Установка Python 3.12
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
-      # Шаг 3: Сборка Docker-образа
-      # Собирает образ из Dockerfile.base с тегом base-service:latest
-      # Этот образ будет использоваться для mock-сервиса
-      - name: Сборка Docker-образа
-        run: docker build -f Dockerfile.base -t base-service:latest .
+      # Шаг 3: Сборка Docker-образа mock-сервиса
+      # Собирает образ из Dockerfile.base с тегом petstore-mock:latest
+      - name: Сборка Docker-образа mock-сервиса
+        run: docker build -f Dockerfile.base -t petstore-mock:latest .
 
-      # Шаг 4: Запуск Docker-контейнера
-      # Запускает сервис petstore-mock в фоновом режиме (-d)
-      # --build - пересобирает контейнер перед запуском
-      # -f указывает конкретный docker-compose файл
-      - name: Запуск HTTP mock-сервиса
-        run: docker compose -f docker-compose.ci.yaml up -d --build
+      # Шаг 4: Запуск mock-сервиса в фоновом режиме
+      # -d (detached) - запуск в фоне
+      # --build - пересобирает перед запуском
+      # --wait - ждет пока сервис станет healthy (требует Docker Compose v2.10+)
+      - name: Запуск mock PetStore API
+        run: docker compose -f docker-compose.ci.yaml up -d --build --wait
 
-      # Шаг 5: Ожидание готовности сервиса
-      # Важно: даем сервису время подняться и пройти healthcheck
-      # Альтернатива: docker compose wait или цикл проверки порта
-      - name: Ожидание готовности сервиса
-        run: sleep 30
+      # Шаг 5: Проверка статуса сервиса (на всякий случай)
+      # Выводит логи и статус контейнера для отладки
+      - name: Проверка статуса сервиса
+        run: |
+          echo "=== Container Status ==="
+          docker compose -f docker-compose.ci.yaml ps
+          echo "=== Container Logs ==="
+          docker logs petstore-mock --tail 20
 
-      # Шаг 6: Установка зависимостей Python
-      # Устанавливает все пакеты из requirements.txt
-      # Включает pytest, allure-pytest, requests, faker и т.д.
+      # Шаг 6: Установка Python-зависимостей
       - name: Установка Python-зависимостей
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
       # Шаг 7: Создание директории для отчетов
-      # Создает папку с именем ID запуска workflow (github.run_id)
-      # Это позволяет хранить историю отчетов
       - name: Создание директории отчетов
         run: mkdir -p ./reports/${{ github.run_id }}
 
       # Шаг 8: Запуск тестов
-      # Выполняет pytest с переданным сценарием (например, -m login)
-      # Генерирует HTML-отчет в специальной папке
-      # Передает локальный URL API через переменную окружения
+      # Передаем API_BASE_URL - важно для base_test.py
+      # Сохраняем HTML-отчет в уникальную папку по ID запуска
       - name: Запуск тестов
         run: pytest ${{ github.event.inputs.SCENARIO }} --html=./reports/${{ github.run_id }}/index.html
         env:
-          # Переменная окружения - используется в base_test.py
-          # Указывает, что тесты должны ходить в локальный mock-сервис
+          # Указываем mock-сервис вместо реального PetStore API
           API_BASE_URL: http://localhost:8080/v2
 
-      # Шаг 9: Публикация отчетов в GitHub Pages
-      # Деплоит HTML-отчеты в ветку gh-pages
-      # Можно просматривать по адресу: https://{user}.github.io/{repo}/reports/{run_id}/
+      # Шаг 9: Деплой отчетов в GitHub Pages
       - name: Деплой отчетов в GitHub Pages
-        if: always()  # Выполняется даже если тесты упали
+        if: always()
         uses: peaceiris/actions-gh-pages@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}  # Автоматический токен GitHub
-          keep_files: true  # Сохраняет старые отчеты
-          publish_dir: reports  # Какую директорию публиковать
-          publish_branch: gh-pages  # В какую ветку
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          keep_files: true
+          publish_dir: reports
+          publish_branch: gh-pages
 
-      # Шаг 10: Остановка Docker-контейнеров
-      # Важно: очищает ресурсы и удаляет volume'ы (-v)
-      # if: always() - гарантирует выполнение даже при ошибках
+      # Шаг 10: Остановка и очистка Docker-контейнеров
+      # -v удаляет volume'ы (вдруг создавались временные файлы)
       - name: Остановка сервисов
         if: always()
         run: docker compose -f docker-compose.ci.yaml down -v
