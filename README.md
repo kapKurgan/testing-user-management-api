@@ -145,7 +145,7 @@ https://kapKurgan.github.io/framework-for-testing-functionality-user-management-
 ```
 
 Например:
-https://kapKurgan.github.io/framework-for-testing-functionality-user-management-API/20433392081/pytest-report.html
+https://kapKurgan.github.io/framework-for-testing-functionality-user-management-API/20436579827/pytest-report.html
 
 
 ### ALLURE 
@@ -154,7 +154,7 @@ https://kapKurgan.github.io/framework-for-testing-functionality-user-management-
 ```
 
 Например:
-https://kapKurgan.github.io/framework-for-testing-functionality-user-management-API/20433392081/allure-report/index.html
+https://kapKurgan.github.io/framework-for-testing-functionality-user-management-API/20436579827/allure-report/index.html
 
 
 ## Требования
