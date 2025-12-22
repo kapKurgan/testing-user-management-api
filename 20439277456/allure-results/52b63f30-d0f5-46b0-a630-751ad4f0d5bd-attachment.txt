@@ -1,0 +1,10 @@
+
+            ==================================================
+            ТЕСТ: test_update_nonexistent_user
+            URL: https://petstore.swagger.io/v2/user/nonexistent_1766424611
+            МЕТОД: PUT
+            СТАТУС: 200
+            ТЕЛО ЗАПРОСА: b'{"id": 16504, "username": "nonexistent_1766424611", "firstName": "Charles", "lastName": "Ramirez", "email": "arnoldcindy@example.org", "password": "9$Bi3bUa1X", "phone": "+1-790-345-6298x9503", "userS'
+            ОТВЕТ: {"code":200,"type":"unknown","message":"16504"}
+            ==================================================
+            

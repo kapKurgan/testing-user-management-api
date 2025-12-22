@@ -1,0 +1,13 @@
+
+            ==================================================
+            ТЕСТ: test_update_user_success
+            URL: https://petstore.swagger.io/v2/user/update_user_1766424611
+            МЕТОД: PUT
+            СТАТУС: 200
+            ТЕЛО ЗАПРОСА: b'{"id": 38286, "username": "update_user_1766424611", "firstName": "UpdatedFirstName", "lastName": "UpdatedLastName", "email": "tanya85@example.org", "password": "8f_8$Dyks&", "phone": "677.923.0758x182'
+            ОТВЕТ: {"code":200,"type":"unknown","message":"38286"}
+            ==================================================
+            
+
+[ОЧИСТКА] Удаление 1 пользователей...
+  ✓ Пользователь update_user_1766424611 удален

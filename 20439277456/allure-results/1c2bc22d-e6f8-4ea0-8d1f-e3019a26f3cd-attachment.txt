@@ -1,0 +1,10 @@
+
+            ==================================================
+            ТЕСТ: test_create_user_success
+            URL: https://petstore.swagger.io/v2/user
+            МЕТОД: POST
+            СТАТУС: 200
+            ТЕЛО ЗАПРОСА: b'{"id": 38933, "username": "eric11", "firstName": "Todd", "lastName": "Martinez", "email": "bholder@example.org", "password": "^3EqG_sgot", "phone": "247-801-4123x89616", "userStatus": 3}'
+            ОТВЕТ: {"code":200,"type":"unknown","message":"38933"}
+            ==================================================
+            

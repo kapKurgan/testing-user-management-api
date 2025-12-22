@@ -1,0 +1,13 @@
+URL: https://petstore.swagger.io/v2/user
+Method: POST
+Data: {
+  "id": 70434,
+  "username": "sotoglenn",
+  "firstName": "Morgan",
+  "lastName": "Chang",
+  "email": "adriana95@example.com",
+  "password": "+V8gTZl#J9",
+  "phone": "963-246-2304",
+  "userStatus": 2
+}
+Params: None

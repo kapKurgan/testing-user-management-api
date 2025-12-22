@@ -1,0 +1,10 @@
+
+            ==================================================
+            ТЕСТ: test_login_failure_special!@#$%
+            URL: https://petstore.swagger.io/v2/user/login?username=special%21%40%23%24%25&password=pass
+            МЕТОД: GET
+            СТАТУС: 200
+            ТЕЛО ЗАПРОСА: None
+            ОТВЕТ: {"code":200,"type":"unknown","message":"logged in user session:1766424610944"}
+            ==================================================
+            
