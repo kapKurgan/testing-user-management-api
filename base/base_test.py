@@ -2,12 +2,13 @@ import requests
 from typing import Dict, Any, Optional
 import json
 import allure
+import os
 
 
 class BaseTest:
     """Базовый класс для всех тестов API"""
 
-    BASE_URL = "https://petstore.swagger.io/v2"
+    BASE_URL = os.getenv("API_BASE_URL", "https://petstore.swagger.io/v2")
     TIMEOUT = 10
 
     def __init__(self):

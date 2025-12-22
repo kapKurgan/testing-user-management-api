@@ -1,0 +1,84 @@
+# docker-compose.ci.yaml
+version: '3.8'
+
+services:
+  # HTTP Mock Service - имитирует PetStore API для тестов
+  http-mock:
+    image: base-service:latest
+    container_name: ci-http-mock
+    ports:
+      - "8080:8080"
+    environment:
+      - SERVICE_MODE=http-mock
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/v2/user/login?username=test&password=test"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - ci-network
+
+  # gRPC Mock Service
+  grpc-mock:
+    image: base-service:latest
+    container_name: ci-grpc-mock
+    ports:
+      - "9090:9090"
+    environment:
+      - SERVICE_MODE=grpc-mock
+    healthcheck:
+      test: ["CMD", "grpc_health_probe", "-addr=:9090"]  # или базовая проверка
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - ci-network
+
+  # HTTP Gateway
+  http-gateway:
+    image: base-service:latest
+    container_name: ci-http-gateway
+    ports:
+      - "8081:8080"
+    environment:
+      - SERVICE_MODE=http-gateway
+      - BACKEND_URL=http://http-mock:8080
+    depends_on:
+      http-mock:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ci-network
+
+  # gRPC Gateway
+  grpc-gateway:
+    image: base-service:latest
+    container_name: ci-grpc-gateway
+    ports:
+      - "50051:50051"
+    environment:
+      - SERVICE_MODE=grpc-gateway
+      - GRPC_BACKEND=grpc-mock:9090
+      - HTTP_BACKEND=http://http-mock:8080
+    depends_on:
+      grpc-mock:
+        condition: service_healthy
+      http-mock:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "grpc_health_probe", "-addr=:50051"]  # или базовая проверка
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ci-network
+
+networks:
+  ci-network:
+    driver: bridge

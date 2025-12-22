@@ -1,75 +1,63 @@
-name: API Tests  # Название workflow — отображается в UI GitHub Actions
+name: API Tests
 
 on:
-  workflow_dispatch: # Позволяет запускать workflow вручную через UI GitHub
+  workflow_dispatch:
     inputs:
       SCENARIO:
-        type: 'choice'  # Пользователь должен выбрать один из заранее заданных конфигов
-        default: 'pytest --html=reports/pytest_report.html -m login'
+        type: choice
+        default: '-m login'
         options:
-          # grpc-сценарии
-          - ./scenarios/grpc/gateway/existing_user_get_documents/v1.0.conf
-          - -m login
-          - pytest --html=reports/pytest_report.html
+          - '-m login'
+          - 'tests/test_user_api.py'
+          - '--html=reports/pytest_report.html -m smoke'
         required: true
-        description: 'Locust config file'  # Комментарий, отображаемый в UI при запуске
+        description: 'Pytest scenario'
 
 jobs:
   run-tests:
-    runs-on: ubuntu-latest  # Используется стандартный GitHub Actions runner
-    timeout-minutes: 30  # Ограничение по времени выполнения — 30 минут
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
-      # 1. Клонируем репозиторий, в котором находится YAML-файл
       - name: Check out repository
         uses: actions/checkout@v4
 
-      # 2. Устанавливаем Python (используется в Locust)
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'  # Версия Python, соответствующая проекту
+          python-version: '3.12'
 
-      # 3. Клонируем репозиторий с урезанным docker-compose стендом и Dockerfile-ами
-      - name: Clone test services
-        run: git clone https://github.com/kapKurgan/framework-for-testing-functionality-user-management-API.git
-
-      # 4. Сборка базового образа, на котором основаны gateway и mock-сервисы
       - name: Build base Docker image
         run: docker build -f Dockerfile.base -t base-service .
 
-      # 5. Запускаем только необходимые сервисы для тестов: grpc-gateway, http-gateway, grpc-mock, http-mock
       - name: Start test services
         run: docker compose -f docker-compose.ci.yaml up -d --build
 
-      # 6. Устанавливаем зависимости, включая Locust и все библиотеки, нужные для запуска сценария
+      - name: Wait for services
+        run: sleep 30  # или лучше использовать docker compose wait
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # 7. Создаём папку, куда будет сохранён HTML-отчёт по результатам теста
       - name: Create report directory
         run: mkdir -p ./reports/${{ github.run_id }}
 
-      # 8. Запускаем Locust с выбранным конфигурационным файлом и сохраняем HTML-отчёт
-      - name: Run load tests and generate HTML report
-#        run: locust --config=${{ github.event.inputs.SCENARIO }} --html=./reports/${{ github.run_id }}/index.html
+      - name: Run tests
         run: pytest ${{ github.event.inputs.SCENARIO }} --html=./reports/${{ github.run_id }}/index.html
+        env:
+          API_BASE_URL: http://localhost:8080  # если используете локальные сервисы
 
-
-
-      # 9. Деплой HTML-отчёта в GitHub Pages, чтобы можно было посмотреть результаты в браузере
       - name: Deploy HTML report to GitHub Pages
         if: always()
         uses: peaceiris/actions-gh-pages@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}  # Авторизация для push в gh-pages
-          keep_files: true  # Сохраняем предыдущие отчёты
-          publish_dir: reports  # Публикуем директорию reports
-          publish_branch: gh-pages  # На ветке gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          keep_files: true
+          publish_dir: reports
+          publish_branch: gh-pages
 
-      # 10. Корректно останавливаем docker-контейнеры и удаляем volume-ы (например, temp-файлы)
       - name: Stop test services
         if: always()
         run: docker compose -f docker-compose.ci.yaml down -v
