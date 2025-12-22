@@ -1,35 +1,30 @@
 # base/base_test.py
-# Базовый класс для всех API-тестов управления пользователями
+# Базовый класс для всех тестов API
+# Работает НЕПОСРЕДСТВЕННО с реальным PetStore API
+# Без поддержки mock-сервера, Docker и локальных переменных
 
-# Импорт стандартных библиотек
 import requests
 import json
-import os
 from typing import Dict, Any, Optional
-
-# Импорт Allure для генерации отчетов о тестах
 import allure
 
 
 class BaseTest:
     """
-    Базовый класс для всех тестов API.
+    Базовый класс для всех тестов API управления пользователями.
 
-    Предоставляет общие методы для выполнения HTTP-запросов,
-    работы с сессиями и логирования.
+    ВАЖНО: Эта версия работает ТОЛЬКО с реальным PetStore API
+    URL захардкожен в константе BASE_URL
 
-    Атрибуты:
-        BASE_URL: Базовый URL API (читается из переменной окружения API_BASE_URL)
-        TIMEOUT: Таймаут для HTTP-запросов в секундах
-        session: HTTP-сессия requests для повторного использования соединений
+    Предоставляет универсальные методы для HTTP-запросов,
+    логирование в Allure и валидацию ответов.
     """
 
-    # Базовый URL API - берется из переменной окружения API_BASE_URL
-    # Если переменная не установлена, используется стандартный PetStore API
-    # Это позволяет легко переключаться между реальным и mock-API
-    BASE_URL = os.getenv("API_BASE_URL", "https://petstore.swagger.io/v2")
+    # ХАРДКОД: URL реального PetStore API
+    # Измените здесь, если нужно тестировать другой сервер
+    BASE_URL = "https://petstore.swagger.io/v2"
 
-    # Таймаут для HTTP-запросов (10 секунд)
+    # Таймаут для HTTP-запросов в секундах
     TIMEOUT = 10
 
     def __init__(self):
@@ -59,10 +54,10 @@ class BaseTest:
             allow_failure: bool = False
     ) -> requests.Response:
         """
-        Универсальный метод для выполнения HTTP-запросов.
+        Универсальный метод для выполнения HTTP-запросов к реальному API.
 
         Аргументы:
-            method: HTTP-метод (GET, POST, PUT, DELETE и т.д.)
+            method: HTTP-метод (POST, GET, PUT, DELETE и т.д.)
             endpoint: End-point API (например, /user/login)
             data: Тело запроса в формате JSON (для POST/PUT)
             params: Query-параметры (для GET)
@@ -159,7 +154,7 @@ class BaseTest:
     @allure.step("Получение пользователя {username}")
     def get_user(self, username: str) -> requests.Response:
         """
-        Получение данных пользователя через GET /user/{username}
+        Получение данных пользователя по username
 
         Аргументы:
             username: Имя пользователя для получения
@@ -169,7 +164,7 @@ class BaseTest:
     @allure.step("Обновление пользователя {username}")
     def update_user(self, username: str, user_data: Dict[str, Any]) -> requests.Response:
         """
-        Обновление данных пользователя через PUT /user/{username}
+        Обновление данных пользователя
 
         Аргументы:
             username: Имя пользователя для обновления
@@ -180,10 +175,10 @@ class BaseTest:
     @allure.step("Удаление пользователя {username}")
     def delete_user(self, username: str, allow_failure: bool = False) -> requests.Response:
         """
-        Удаление пользователя через DELETE /user/{username}
+        Удаление пользователя
 
         Аргументы:
-            username: Имя пользователя для удаления
+            username: Име пользователя для удаления
             allow_failure: Если True, не выбрасывает исключение при ошибке (например, 404)
         """
         return self._make_request("DELETE", f"/user/{username}", expected_status=200, allow_failure=allow_failure)
@@ -191,7 +186,7 @@ class BaseTest:
     @allure.step("Авторизация пользователя {username}")
     def login(self, username: str, password: str) -> requests.Response:
         """
-        Вход пользователя в систему через GET /user/login
+        Вход пользователя в систему
 
         Аргументы:
             username: Имя пользователя
@@ -207,7 +202,7 @@ class BaseTest:
     @allure.step("Выход из системы")
     def logout(self) -> requests.Response:
         """
-        Выход пользователя из системы через GET /user/logout
+        Выход пользователя из системы
         """
         return self._make_request("GET", "/user/logout", expected_status=200)
 

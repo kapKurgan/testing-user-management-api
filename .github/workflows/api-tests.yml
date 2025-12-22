@@ -1,14 +1,12 @@
-# .github/workflows/api-tests.yml
-# GitHub Actions workflow для тестирования API управления пользователями
-
 name: API Tests
 
 on:
+  # Ручной запуск тестов через интерфейс GitHub
   workflow_dispatch:
     inputs:
       SCENARIO:
-        type: 'choice'
-        default: '-m smoke'
+        type: choice
+        default: '-m login'
         options:
           - '-m login'
           - '-m smoke'
@@ -25,71 +23,61 @@ on:
 jobs:
   run-tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 30  # Ограничение по времени выполнения
 
     steps:
       # Шаг 1: Клонирование репозитория
       - name: Клонирование репозитория
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Полное клонирование для корректной работы с ветками
 
       # Шаг 2: Установка Python 3.12
-      - name: Установка Python 3.12
+      - name: Установка Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+          cache: 'pip'  # Кэширование зависимостей для ускорения сборки
 
-      # Шаг 3: Сборка Docker-образа mock-сервиса
-      # Собирает образ из Dockerfile.base с тегом petstore-mock:latest
-      - name: Сборка Docker-образа mock-сервиса
-        run: docker build -f Dockerfile.base -t petstore-mock:latest .
-
-      # Шаг 4: Запуск mock-сервиса в фоновом режиме
-      # -d (detached) - запуск в фоне
-      # --build - пересобирает перед запуском
-      # --wait - ждет пока сервис станет healthy (требует Docker Compose v2.10+)
-      - name: Запуск mock PetStore API
-        run: docker compose -f docker-compose.ci.yaml up -d --build --wait
-
-      # Шаг 5: Проверка статуса сервиса (на всякий случай)
-      # Выводит логи и статус контейнера для отладки
-      - name: Проверка статуса сервиса
-        run: |
-          echo "=== Container Status ==="
-          docker compose -f docker-compose.ci.yaml ps
-          echo "=== Container Logs ==="
-          docker logs petstore-mock --tail 20
-
-      # Шаг 6: Установка Python-зависимостей
-      - name: Установка Python-зависимостей
+      # Шаг 3: Установка Python-зависимостей
+      - name: Установка зависимостей
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # Шаг 7: Создание директории для отчетов
+      # Шаг 4: Создание директории для отчетов
+      # Каждый запуск workflow получает уникальную папку (github.run_id)
       - name: Создание директории отчетов
         run: mkdir -p ./reports/${{ github.run_id }}
 
-      # Шаг 8: Запуск тестов
-      # Передаем API_BASE_URL - важно для base_test.py
-      # Сохраняем HTML-отчет в уникальную папку по ID запуска
+      # Шаг 5: Запуск тестов
+      # Использует переданный сценарий (например, -m login)
+      # Сохраняет HTML-отчет в уникальную папку
+      # Тесты обращаются напрямую к https://petstore.swagger.io/v2
       - name: Запуск тестов
         run: pytest ${{ github.event.inputs.SCENARIO }} --html=./reports/${{ github.run_id }}/index.html
         env:
-          # Указываем mock-сервис вместо реального PetStore API
-          API_BASE_URL: http://localhost:8080/v2
+          # Хардкод URL реального API (можно вынести в переменную окружения репозитория)
+          API_BASE_URL: https://petstore.swagger.io/v2
 
-      # Шаг 9: Деплой отчетов в GitHub Pages
+      # Шаг 6: Деплой HTML-отчетов в GitHub Pages
+      # Выполняется всегда (даже если тесты упали)
+      # Публикует все отчеты в ветку gh-pages
       - name: Деплой отчетов в GitHub Pages
         if: always()
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          keep_files: true
-          publish_dir: reports
-          publish_branch: gh-pages
+          keep_files: true  # Сохраняет предыдущие отчеты
+          publish_dir: reports  # Публикует всю директорию reports
+          publish_branch: gh-pages  # Целевая ветка
 
-      # Шаг 10: Остановка и очистка Docker-контейнеров
-      # -v удаляет volume'ы (вдруг создавались временные файлы)
-      - name: Остановка сервисов
+      # Шаг 7: Публикация артефактов (опционально)
+      # Сохраняет отчеты как артефакты workflow
+      - name: Публикация артефактов
         if: always()
-        run: docker compose -f docker-compose.ci.yaml down -v
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports-${{ github.run_id }}
+          path: reports/${{ github.run_id }}/
+          retention-days: 30  # Хранить 30 дней
