@@ -8,7 +8,7 @@ on:
     inputs:
       SCENARIO:
         type: 'choice'
-        default: '-m login'
+        default: ' '
         options:
           - '-m login'
           - '-m smoke'
@@ -19,10 +19,6 @@ on:
           - '-m update'
           - '-m delete'
           - '-m performance'
-          - '-v'
-          - '--strict-markers'
-          - '--tb=short'
-          - '--disable-warnings'
         required: true
         description: 'Выберите набор тестов для запуска'
 
