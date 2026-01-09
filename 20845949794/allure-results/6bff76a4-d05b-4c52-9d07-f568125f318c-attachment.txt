@@ -1,0 +1,10 @@
+
+            ==================================================
+            ТЕСТ: test_login_failure_nonexistent
+            URL: https://petstore.swagger.io/v2/user/login?username=nonexistent&password=wrongpass
+            МЕТОД: GET
+            СТАТУС: 200
+            ТЕЛО ЗАПРОСА: None
+            ОТВЕТ: {"code":200,"type":"unknown","message":"logged in user session:1767947443775"}
+            ==================================================
+            
