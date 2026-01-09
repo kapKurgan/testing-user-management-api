@@ -37,6 +37,7 @@ class TestUserAPI:
     @pytest.mark.create
     def test_create_user_success(self):
         """Тест успешного создания пользователя"""
+        print(f"▶️ Тест успешного создания пользователя")
         with allure.step("Генерация данных пользователя"):
             user_data = self.generator.generate_single_user()
 
@@ -52,6 +53,7 @@ class TestUserAPI:
 
         with allure.step("Сохранение для очистки"):
             self.created_users.append(user_data["username"])
+        print(f"🏁 Тест окончен")
 
     @allure.story("Создание пользователя")
     @allure.title("Создание пользователя с пустыми данными")
@@ -59,6 +61,7 @@ class TestUserAPI:
     @pytest.mark.create
     def test_create_user_with_empty_data(self):
         """Тест создания пользователя с пустыми данными"""
+        print(f"▶️ Тест создания пользователя с пустыми данными")
         with allure.step("Генерация пустых данных"):
             user_data = self.generator.generate_invalid_user_data("empty_fields")
 
@@ -72,6 +75,7 @@ class TestUserAPI:
             # У пустого юзернейна не может быть DELETE
             if user_data.get("username"):
                 self.created_users.append(user_data["username"])
+        print(f"🏁 Тест окончен")
 
     @allure.story("Авторизация пользователя")
     @allure.title("Успешный вход в систему")
@@ -79,6 +83,7 @@ class TestUserAPI:
     @pytest.mark.login
     def test_login_success(self):
         """Тест успешного входа пользователя"""
+        print(f"▶️ Тест успешного входа пользователя")
         username = f"login_user_{int(time.time())}"
         password = "testpass123"
 
@@ -102,6 +107,7 @@ class TestUserAPI:
 
         with allure.step("Сохранение для очистки"):
             self.created_users.append(username)
+        print(f"🏁 Тест окончен")
 
     @allure.story("Авторизация пользователя")
     @allure.title("Неуспешный вход с невалидными данными")
@@ -114,6 +120,7 @@ class TestUserAPI:
     ])
     def test_login_failure(self, username, password):
         """Тест неуспешного входа с невалидными данными"""
+        print(f"▶️ Тест неуспешного входа с невалидными данными")
         with allure.step(f"Попытка входа с username='{username}'"):
             response = self.base.login(username, password)
             self.base.log_response(response, f"test_login_failure_{username}")
@@ -122,6 +129,7 @@ class TestUserAPI:
             # PetStore возвращает 200 даже для неверных данных
             assert response.status_code == 200
             assert "logged in user session:" in response.text
+        print(f"🏁 Тест окончен")
 
     @allure.story("Выход из системы")
     @allure.title("Успешный выход из системы")
@@ -129,6 +137,7 @@ class TestUserAPI:
     @pytest.mark.login
     def test_logout_success(self):
         """Тест успешного выхода из системы"""
+        print(f"▶️ Тест успешного выхода из системы")
         username = f"logout_user_{int(time.time())}"
 
         with allure.step("Создание и вход пользователя"):
@@ -147,6 +156,7 @@ class TestUserAPI:
 
         with allure.step("Сохранение для очистки"):
             self.created_users.append(username)
+        print(f"🏁 Тест окончен")
 
     @allure.story("Обновление пользователя")
     @allure.title("Успешное обновление данных пользователя")
@@ -154,6 +164,7 @@ class TestUserAPI:
     @pytest.mark.update
     def test_update_user_success(self):
         """Тест успешного обновления данных пользователя"""
+        print(f"▶️ Тест успешного обновления данных пользователя")
         username = f"update_user_{int(time.time())}"
 
         with allure.step("Создание пользователя"):
@@ -186,6 +197,7 @@ class TestUserAPI:
 
         with allure.step("Сохранение для очистки"):
             self.created_users.append(username)
+        print(f"🏁 Тест окончен")
 
     @allure.story("Обновление пользователя")
     @allure.title("Обновление несуществующего пользователя")
@@ -193,6 +205,7 @@ class TestUserAPI:
     @pytest.mark.update
     def test_update_nonexistent_user(self):
         """Тест обновления несуществующего пользователя"""
+        print(f"▶️ Тест обновления несуществующего пользователя")
         fake_username = f"nonexistent_{int(time.time())}"
 
         with allure.step("Генерация данных"):
@@ -205,6 +218,7 @@ class TestUserAPI:
         with allure.step("Валидация ответа"):
             # PetStore API возвращает 200 для несуществующего
             assert response.status_code == 200
+        print(f"🏁 Тест окончен")
 
     @allure.story("Удаление пользователя")
     @allure.title("Успешное удаление пользователя")
@@ -212,6 +226,7 @@ class TestUserAPI:
     @pytest.mark.delete
     def test_delete_user_success(self):
         """Тест успешного удаления пользователя"""
+        print(f"▶️ Тест успешного удаления пользователя")
         username = f"delete_user_{int(time.time())}"
 
         with allure.step("Создание пользователя"):
@@ -232,6 +247,7 @@ class TestUserAPI:
             except Exception:
                 allure.attach("Пользователь действительно удален", name="Удаление",
                               attachment_type=allure.attachment_type.TEXT)
+        print(f"🏁 Тест окончен")
 
     @allure.story("Удаление пользователя")
     @allure.title("Удаление несуществующего пользователя")
@@ -239,6 +255,7 @@ class TestUserAPI:
     @pytest.mark.delete
     def test_delete_nonexistent_user(self):
         """Тест удаления несуществующего пользователя"""
+        print(f"▶️ Тест удаления несуществующего пользователя")
         fake_username = f"fake_delete_{int(time.time())}"
 
         with allure.step("Попытка удаления несуществующего"):
@@ -248,12 +265,14 @@ class TestUserAPI:
         with allure.step("Валидация ответа"):
             # Нормально получить 404 или 200 для тестового API
             assert response.status_code in [200, 404]
+        print(f"🏁 Тест окончен")
 
     @allure.story("Получение пользователя")
     @allure.title("Успешное получение данных пользователя")
     @pytest.mark.smoke
     def test_get_user_success(self):
         """Тест получения данных пользователя"""
+        print(f"▶️ Тест получения данных пользователя")
         username = f"get_user_{int(time.time())}"
 
         with allure.step("Создание пользователя"):
@@ -280,12 +299,14 @@ class TestUserAPI:
 
         with allure.step("Сохранение для очистки"):
             self.created_users.append(username)
+        print(f"🏁 Тест окончен")
 
     @allure.story("Получение пользователя")
     @allure.title("Получение несуществующего пользователя")
     @pytest.mark.regression
     def test_get_nonexistent_user(self):
         """Тест получения несуществующего пользователя"""
+        print(f"▶️ Тест получения несуществующего пользователя")
         fake_username = f"fake_get_{int(time.time())}"
 
         with allure.step("Попытка получения"):
@@ -298,12 +319,14 @@ class TestUserAPI:
                     name="Ошибка 404",
                     attachment_type=allure.attachment_type.TEXT
                 )
+        print(f"🏁 Тест окончен")
 
     @allure.story("Производительность")
     @allure.title("Создание 10 пользователей за разумное время")
     @pytest.mark.performance
     def test_create_multiple_users_performance(self):
         """Тест создание нескольких пользователей"""
+        print(f"▶️ Тест создание нескольких пользователей")
         with allure.step("Генерация 10 пользователей"):
             users = self.generator.generate_bulk_users(10)
 
@@ -323,3 +346,4 @@ class TestUserAPI:
                 attachment_type=allure.attachment_type.TEXT
             )
             assert duration < 10
+        print(f"🏁 Тест окончен")

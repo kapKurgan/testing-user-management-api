@@ -43,7 +43,7 @@ framework-for-testing-functionality-user-management-API/
 |-- generators/
 |   `-- data_generator.py          # Генератор тестовых данных
 |-- reports/
-|   `-- report_generator.py        # Генератор отчетов
+|   
 `-- tests/
     `-- test_user_api.py           # Тестовые сценарии
 ```
@@ -75,12 +75,6 @@ framework-for-testing-functionality-user-management-API/
 - Сегментация тестов по маркерам (smoke, regression, performance)
 - Автоматическая очистка тестовых данных
 - Параметризованные негативные тесты
-
-[**ReportGenerator**](./reports/report_generator.py)
-
-- Генерация HTML, JSON и текстовых отчетов
-- Автоматический расчет статистики
-- Временные метки и продолжительность выполнения
 
 ---
 
