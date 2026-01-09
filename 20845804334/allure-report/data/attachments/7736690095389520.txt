@@ -1,0 +1,2 @@
+[ERROR] Ошибка запроса: GET https://petstore.swagger.io/v2/user/delete_user_1767947074
+Детали: 404 Client Error: Not Found for url: https://petstore.swagger.io/v2/user/delete_user_1767947074

@@ -1,0 +1,10 @@
+
+            ==================================================
+            ТЕСТ: test_get_user_success
+            URL: https://petstore.swagger.io/v2/user/get_user_1767947075
+            МЕТОД: GET
+            СТАТУС: 200
+            ТЕЛО ЗАПРОСА: None
+            ОТВЕТ: {"id":19390,"username":"get_user_1767947075","firstName":"Jose","lastName":"Nguyen","email":"thompsonamanda@example.org","password":"_$9S!Ow*+z","phone":"967-835-7605x257","userStatus":3}
+            ==================================================
+            

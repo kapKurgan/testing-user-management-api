@@ -1,0 +1,12 @@
+▶️ Тест обновления несуществующего пользователя
+
+            ==================================================
+            ТЕСТ: test_update_nonexistent_user
+            URL: https://petstore.swagger.io/v2/user/nonexistent_1767947073
+            МЕТОД: PUT
+            СТАТУС: 200
+            ТЕЛО ЗАПРОСА: b'{"id": 71139, "username": "nonexistent_1767947073", "firstName": "Laurie", "lastName": "Olson", "email": "markmays@example.net", "password": "(_C2X8Fb#*", "phone": "716-335-6103x44150", "userStatus": '
+            ОТВЕТ: {"code":200,"type":"unknown","message":"71139"}
+            ==================================================
+            
+🏁 Тест окончен

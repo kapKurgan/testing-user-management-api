@@ -1,0 +1,4 @@
+▶️ Тест получения несуществующего пользователя
+[ERROR] Ошибка запроса: GET https://petstore.swagger.io/v2/user/fake_get_1767947075
+Детали: 404 Client Error: Not Found for url: https://petstore.swagger.io/v2/user/fake_get_1767947075
+🏁 Тест окончен
