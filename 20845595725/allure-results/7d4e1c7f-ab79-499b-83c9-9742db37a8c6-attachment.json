@@ -1,0 +1,13 @@
+URL: https://petstore.swagger.io/v2/user/update_user_1767946535
+Method: PUT
+Data: {
+  "id": 36314,
+  "username": "update_user_1767946535",
+  "firstName": "UpdatedFirstName",
+  "lastName": "UpdatedLastName",
+  "email": "nelsonrobert@example.net",
+  "password": "U0L^tuCe$e",
+  "phone": "671.413.3888x322",
+  "userStatus": 3
+}
+Params: None

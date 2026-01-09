@@ -1,0 +1,10 @@
+
+            ==================================================
+            ТЕСТ: test_update_user_success
+            URL: https://petstore.swagger.io/v2/user/update_user_1767946535
+            МЕТОД: PUT
+            СТАТУС: 200
+            ТЕЛО ЗАПРОСА: b'{"id": 36314, "username": "update_user_1767946535", "firstName": "UpdatedFirstName", "lastName": "UpdatedLastName", "email": "nelsonrobert@example.net", "password": "U0L^tuCe$e", "phone": "671.413.388'
+            ОТВЕТ: {"code":200,"type":"unknown","message":"36314"}
+            ==================================================
+            

@@ -1,0 +1,10 @@
+
+            ==================================================
+            ТЕСТ: test_delete_user_success
+            URL: https://petstore.swagger.io/v2/user/delete_user_1767946535
+            МЕТОД: DELETE
+            СТАТУС: 200
+            ТЕЛО ЗАПРОСА: None
+            ОТВЕТ: {"code":200,"type":"unknown","message":"delete_user_1767946535"}
+            ==================================================
+            
