@@ -81,3 +81,11 @@ jobs:
           name: test-results-${{ github.run_id }}
           path: reports/${{ github.run_id }}/
           retention-days: 30
+
+      - name: Вывод ссылки на отчет
+        if: always()
+        run: |
+          echo "✅ Allure отчет доступен по ссылке:"
+          echo "🔗 https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/${{ github.run_id }}/allure-report/index.html"
+          echo "✅ HTML отчет доступен по ссылке:"
+          echo "🔗 https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/${{ github.run_id }}/pytest_report.html"

@@ -1,8 +1,19 @@
-venv
-.pytest_cache
-__pycache__
-.MyStep.txt
-allure-report
-allure-results
-__init__.py
+# pycharm
 .idea
+.pytest_cache
+__init__.py
+
+# python
+venv
+.venv
+__pycache__
+
+# report
+allure-results
+allure-report
+assets
+pytest_report.html
+pytest.log
+
+# Mac OS
+.DS_Store
