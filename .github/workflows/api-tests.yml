@@ -88,4 +88,4 @@ jobs:
           echo "✅ Allure отчет доступен по ссылке:"
           echo "🔗 https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/${{ github.run_id }}/allure-report/index.html"
           echo "✅ HTML отчет доступен по ссылке:"
-          echo "🔗 https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/${{ github.run_id }}/pytest_report.html"
+          echo "🔗 https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/${{ github.run_id }}/pytest-report.html"
