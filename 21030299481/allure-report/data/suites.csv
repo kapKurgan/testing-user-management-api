@@ -1,0 +1,2 @@
+"Status","Start Time","Stop Time","Duration in ms","Parent Suite","Suite","Sub Suite","Test Class","Test Method","Name","Description"
+"passed","Thu Jan 15 11:51:17 UTC 2026","Thu Jan 15 11:51:18 UTC 2026","738","tests","test_user_api","TestUserAPI","","","Создание 10 пользователей за разумное время","Тест создание нескольких пользователей"
