@@ -1,0 +1,7 @@
+URL: https://petstore.swagger.io/v2/user/login
+Method: GET
+Data: None
+Params: {
+  "username": "logout_user_1768566440",
+  "password": "*#v0Upl6C0"
+}
