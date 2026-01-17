@@ -163,7 +163,7 @@ allure serve reports/allure-results
 Конфигурацию можно найти в [api-tests.yml](./.github/workflows/api-tests.yml).   
 
 Автоматический запуск через интерфейс GitHub:
-- [Перейдите в Actions > API Tests > Run workflow](https://github.com/kapKurgan/testing-user-management-api/actions)
+- [Перейдите в Actions > API Tests > Run workflow](https://github.com/kapKurgan/testing-user-management-api/actions/workflows/api-tests.yml)
 - Выберите сценарий тестов (например, **-m login**)
 - Нажмите **workflow**
 - Система выполнит тесты напрямую к https://petstore.swagger.io
