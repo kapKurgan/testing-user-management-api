@@ -1,0 +1,10 @@
+
+            ==================================================
+            ТЕСТ: test_logout_success
+            URL: https://petstore.swagger.io/v2/user/logout
+            МЕТОД: GET
+            СТАТУС: 200
+            ТЕЛО ЗАПРОСА: None
+            ОТВЕТ: {"code":200,"type":"unknown","message":"ok"}
+            ==================================================
+            

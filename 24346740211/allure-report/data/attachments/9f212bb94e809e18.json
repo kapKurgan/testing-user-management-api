@@ -1,0 +1,7 @@
+URL: https://petstore.swagger.io/v2/user/login
+Method: GET
+Data: None
+Params: {
+  "username": "special!@#$%",
+  "password": "pass"
+}
