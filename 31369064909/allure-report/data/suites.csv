@@ -1,0 +1,6 @@
+"Status","Start Time","Stop Time","Duration in ms","Parent Suite","Suite","Sub Suite","Test Class","Test Method","Name","Description"
+"passed","Mon Aug 10 08:13:07 UTC 2026","Mon Aug 10 08:13:08 UTC 2026","458","tests","test_user_api","TestUserAPI","","","Успешный выход из системы","Тест успешного выхода из системы"
+"passed","Mon Aug 10 08:13:07 UTC 2026","Mon Aug 10 08:13:07 UTC 2026","322","tests","test_user_api","TestUserAPI","","","Неуспешный вход с невалидными данными","Тест неуспешного входа с невалидными данными"
+"passed","Mon Aug 10 08:13:07 UTC 2026","Mon Aug 10 08:13:07 UTC 2026","384","tests","test_user_api","TestUserAPI","","","Успешный вход в систему","Тест успешного входа пользователя"
+"passed","Mon Aug 10 08:13:07 UTC 2026","Mon Aug 10 08:13:07 UTC 2026","309","tests","test_user_api","TestUserAPI","","","Неуспешный вход с невалидными данными","Тест неуспешного входа с невалидными данными"
+"passed","Mon Aug 10 08:13:07 UTC 2026","Mon Aug 10 08:13:07 UTC 2026","325","tests","test_user_api","TestUserAPI","","","Неуспешный вход с невалидными данными","Тест неуспешного входа с невалидными данными"
